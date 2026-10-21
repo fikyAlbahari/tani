@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --color-canvas: #f2f6f3;
+    --color-ink: #10231a;
+
+    --color-brand-50: #eefdf3;
+    --color-brand-100: #d7f9e3;
+    --color-brand-200: #b0f0c9;
+    --color-brand-300: #7ce2ac;
+    --color-brand-400: #46cb88;
+    --color-brand-500: #22b26b;
+    --color-brand-600: #148f53;
+    --color-brand-700: #127345;
+    --color-brand-800: #125b39;
+    --color-brand-900: #104a31;
+    --color-brand-950: #0a2c1e;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-canvas font-sans text-ink antialiased;
+    }
+
+    ::selection {
+        @apply bg-brand-500/25 text-brand-950;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply rounded-full border-2 border-canvas bg-ink/15;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-ink/25;
+    }
+}
+
+@layer components {
+    .card {
+        @apply rounded-2xl border border-ink/[.07] bg-white;
+        box-shadow: 0 1px 2px rgba(16, 35, 26, .05), 0 16px 40px -24px rgba(16, 35, 26, .25);
+    }
+
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40;
+    }
+
+    .btn-primary {
+        @apply bg-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(20,143,83,.85)] hover:-translate-y-0.5 hover:bg-brand-700 active:translate-y-0;
+    }
+
+    .btn-dark {
+        @apply bg-ink text-white hover:-translate-y-0.5 hover:bg-ink/90;
+    }
+
+    .btn-ghost {
+        @apply border border-ink/10 bg-white text-ink/65 hover:border-brand-300 hover:bg-brand-50/60 hover:text-brand-800;
+    }
+
+    .btn-danger {
+        @apply bg-rose-500 text-white shadow-[0_10px_24px_-10px_rgba(244,63,94,.8)] hover:bg-rose-600;
+    }
+
+    .btn-sm {
+        @apply px-3 py-2 text-[13px];
+    }
+
+    .icon-btn {
+        @apply inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-ink/10 bg-white text-ink/55 transition-all hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700;
+    }
+
+    .icon-btn-danger:hover {
+        @apply border-rose-200 bg-rose-50 text-rose-600;
+    }
+
+    .input {
+        @apply w-full rounded-xl border border-ink/10 bg-white px-3.5 py-2.5 text-sm font-medium text-ink transition placeholder:text-ink/35 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15;
+    }
+
+    .select {
+        @apply w-full cursor-pointer rounded-xl border border-ink/10 bg-white px-3.5 py-2.5 text-sm font-medium text-ink transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15;
+        padding-right: 2.5rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.85rem center;
+    }
+
+    .textarea {
+        @apply w-full resize-y rounded-xl border border-ink/10 bg-white px-3.5 py-2.5 text-sm font-medium text-ink transition placeholder:text-ink/35 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15;
+    }
+
+    .label {
+        @apply mb-1.5 block text-[13px] font-bold text-ink/75;
+    }
+
+    .field-req {
+        @apply text-rose-500;
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none;
+    }
+
+    .badge-success {
+        @apply bg-brand-100 text-brand-800;
+    }
+
+    .badge-info {
+        @apply bg-sky-100 text-sky-800;
+    }
+
+    .badge-warning {
+        @apply bg-amber-100 text-amber-800;
+    }
+
+    .badge-muted {
+        @apply bg-ink/[.06] text-ink/55;
+    }
+
+    .badge-danger {
+        @apply bg-rose-100 text-rose-700;
+    }
+
+    .sidebar-link {
+        @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-semibold text-white/60 transition-all hover:bg-white/10 hover:text-white;
+    }
+
+    .sidebar-link-active {
+        @apply bg-white/[.14] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.12)] ring-1 ring-white/10;
+    }
+
+    .nav-pill {
+        @apply inline-flex items-center gap-2 rounded-full bg-white/8 px-3.5 py-2 text-[13px] font-semibold text-white/70 backdrop-blur transition hover:bg-white/15 hover:text-white;
+    }
+
+    .page-item {
+        @apply inline-flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-xl border border-ink/10 bg-white px-3 text-[13px] font-bold text-ink/55 transition;
+    }
+
+    .page-item:hover {
+        @apply border-brand-300 text-brand-700;
+    }
+
+    .page-item-active {
+        @apply border-brand-600 bg-brand-600 text-white shadow-[0_8px_18px_-8px_rgba(20,143,83,.9)];
+    }
+
+    .page-item-disabled {
+        @apply cursor-default bg-ink/[.03] opacity-60 hover:border-ink/10 hover:text-ink/55;
+    }
+
+    .event-chip {
+        @apply block truncate rounded-md border-l-[3px] px-1.5 py-[3px] text-[10px] font-bold leading-tight transition hover:brightness-95;
+    }
+
+    .event-tanam {
+        @apply border-sky-500 bg-sky-50 text-sky-800;
+    }
+
+    .event-panen {
+        @apply border-brand-500 bg-brand-100 text-brand-800;
+    }
+
+    .event-pupuk {
+        @apply border-amber-400 bg-amber-50 text-amber-800;
+    }
+
+    .event-semprot {
+        @apply border-rose-400 bg-rose-50 text-rose-700;
+    }
+
+    .th {
+        @apply px-4 py-3 text-left text-[11px] font-extrabold tracking-[.06em] text-ink/45 uppercase;
+    }
+
+    .td {
+        @apply border-t border-ink/[.06] px-4 py-3.5 align-middle text-sm;
+    }
+
+    .row-hover {
+        @apply transition-colors hover:bg-brand-50/50;
+    }
+}
+
+@layer utilities {
+    #sidebar.is-open {
+        translate: 0 0;
+    }
+}
