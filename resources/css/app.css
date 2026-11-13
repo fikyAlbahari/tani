@@ -205,7 +205,69 @@
 }
 
 @layer utilities {
+    #sidebar {
+        transition: width .3s ease-out, translate .3s ease-out;
+    }
+
     #sidebar.is-open {
         translate: 0 0;
+    }
+
+    #mainContent {
+        transition: padding-left .3s ease-out;
+    }
+
+    #sidebar .sidebar-label {
+        white-space: nowrap;
+    }
+
+    #sidebar nav {
+        overflow-x: hidden;
+    }
+
+    @media (min-width: 1024px) {
+        html.sidebar-collapsed #sidebar {
+            width: 5.25rem;
+            translate: 0 0;
+        }
+
+        html.sidebar-collapsed #mainContent {
+            padding-left: 6.25rem;
+        }
+
+        html.sidebar-collapsed .sidebar-label {
+            display: none;
+        }
+
+        html.sidebar-collapsed #sidebarHeader {
+            flex-direction: column;
+            gap: .5rem;
+            padding-inline: 0;
+        }
+
+        html.sidebar-collapsed #brandLink {
+            flex: none;
+            justify-content: center;
+        }
+
+        html.sidebar-collapsed #btnSidebarToggle i {
+            transform: rotate(180deg);
+        }
+
+        html.sidebar-collapsed .sidebar-link {
+            justify-content: center;
+            gap: 0;
+            padding-inline: 0;
+        }
+
+        html.sidebar-collapsed #userPanel {
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        html.sidebar-collapsed #userPanel > div {
+            justify-content: center;
+        }
     }
 }

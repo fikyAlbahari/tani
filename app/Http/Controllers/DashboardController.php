@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\JadwalTanam;
+use App\Models\Biaya;
 use App\Models\Pemupukan;
 use App\Models\Penyemprotan;
+use App\Services\CalendarService;
 use App\Services\NewsService;
 use App\Services\WeatherService;
 use Carbon\Carbon;
@@ -14,7 +16,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request, WeatherService $weather, NewsService $news): View
+    public function index(Request $request, WeatherService $weather, NewsService $news, CalendarService $calendar): View
     {
         $month = (int) $request->query('bulan', Carbon::now()->month);
         $year = (int) $request->query('tahun', Carbon::now()->year);
@@ -29,20 +31,22 @@ class DashboardController extends Controller
         $tanams = JadwalTanam::orderBy('tanggal_tanam')->get();
         $pemupukans = Pemupukan::orderBy('tanggal')->get();
         $penyemprotans = Penyemprotan::orderBy('tanggal')->get();
+        $biayas = Biaya::orderBy('tanggal')->get();
 
         return view('dashboard', [
-            'stats' => $this->stats($tanams, $pemupukans, $penyemprotans, $start, $end),
+            'stats' => $this->stats($tanams, $pemupukans, $penyemprotans, $biayas, $start, $end),
             'weather' => $weather->current($refresh),
             'news' => $news->latest(6, $refresh),
-            'calendar' => $this->calendar($start, $tanams, $pemupukans, $penyemprotans),
+            'calendar' => $calendar->build($start, $tanams, $pemupukans, $penyemprotans),
             'upcoming' => $this->upcoming($tanams, $pemupukans, $penyemprotans),
             'recentTanam' => $tanams->sortByDesc('created_at')->take(5)->values(),
             'recentPemupukan' => $pemupukans->sortByDesc('created_at')->take(5)->values(),
             'recentPenyemprotan' => $penyemprotans->sortByDesc('created_at')->take(5)->values(),
+            'biayaPerBulanTanam' => $this->biayaPerBulanTanam($biayas),
         ]);
     }
 
-    private function stats(Collection $tanams, Collection $pemupukans, Collection $penyemprotans, Carbon $start, Carbon $end): array
+    private function stats(Collection $tanams, Collection $pemupukans, Collection $penyemprotans, Collection $biayas, Carbon $start, Carbon $end): array
     {
         $inMonth = fn (Carbon $date) => $date->between($start, $end);
 
@@ -52,85 +56,34 @@ class DashboardController extends Controller
             'panen_bulan_ini' => $tanams->filter(fn ($t) => $t->perkiraan_panen && $inMonth($t->perkiraan_panen))->count(),
             'pemupukan_bulan_ini' => $pemupukans->filter(fn ($p) => $inMonth($p->tanggal))->count(),
             'penyemprotan_bulan_ini' => $penyemprotans->filter(fn ($p) => $inMonth($p->tanggal))->count(),
+            'biaya_bulan_ini' => $biayas->filter(fn ($b) => $inMonth($b->tanggal))->sum(fn ($b) => (float) $b->jumlah),
         ];
     }
 
     /**
-     * @return array{days:array<int,array<string,mixed>>,prev:array{bulan:int,tahun:int,label:string},next:array{bulan:int,tahun:int,label:string},title:string}
+     * @return Collection<int, array{bulan:?string,label:string,periode:string,total:float,jumlah_catatan:int,tanaman:string,tanggal:string,latest:int}>
      */
-    private function calendar(Carbon $start, Collection $tanams, Collection $pemupukans, Collection $penyemprotans): array
+    private function biayaPerBulanTanam(Collection $biayas): Collection
     {
-        $events = [];
+        return $biayas
+            ->groupBy(fn (Biaya $b) => (string) $b->bulan_tanam)
+            ->map(function (Collection $rows, string $bulan) {
+                $latest = $rows->sortByDesc(fn (Biaya $b) => $b->tanggal?->timestamp ?? 0)->first()?->tanggal;
+                $bulan = $bulan !== '' ? $bulan : null;
 
-        foreach ($tanams as $t) {
-            if ($t->tanggal_tanam) {
-                $events[$t->tanggal_tanam->format('Y-m-d')][] = [
-                    'type' => 'tanam',
-                    'label' => 'Tanam '.$t->nama_tanaman,
-                    'url' => route('jadwal.index'),
+                return [
+                    'bulan' => $bulan,
+                    'label' => Biaya::bulanLabelFor($bulan),
+                    'periode' => Biaya::periodeLabelFor($bulan),
+                    'total' => (float) $rows->sum(fn (Biaya $b) => (float) $b->jumlah),
+                    'jumlah_catatan' => $rows->count(),
+                    'tanaman' => $rows->pluck('nama_tanaman')->filter()->unique()->implode(', '),
+                    'tanggal' => $latest?->translatedFormat('d M Y') ?? '-',
+                    'latest' => $latest?->timestamp ?? 0,
                 ];
-            }
-            if ($t->perkiraan_panen) {
-                $events[$t->perkiraan_panen->format('Y-m-d')][] = [
-                    'type' => 'panen',
-                    'label' => 'Panen '.$t->nama_tanaman,
-                    'url' => route('jadwal.index'),
-                ];
-            }
-        }
-
-        foreach ($pemupukans as $p) {
-            $events[$p->tanggal->format('Y-m-d')][] = [
-                'type' => 'pupuk',
-                'label' => 'Pupuk '.$p->nama_tanaman,
-                'url' => route('pemupukan.index'),
-            ];
-        }
-
-        foreach ($penyemprotans as $p) {
-            $events[$p->tanggal->format('Y-m-d')][] = [
-                'type' => 'semprot',
-                'label' => 'Semprot '.$p->nama_tanaman,
-                'url' => route('penyemprotan.index'),
-            ];
-        }
-
-        $daysInMonth = $start->daysInMonth;
-        $leading = ($start->dayOfWeekIso - 1);
-
-        $cells = [];
-        for ($i = 0; $i < $leading; $i++) {
-            $cells[] = null;
-        }
-
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $date = $start->copy()->addDays($day - 1);
-            $key = $date->format('Y-m-d');
-
-            $cells[] = [
-                'day' => $day,
-                'date' => $key,
-                'is_today' => $date->isToday(),
-                'is_weekend' => $date->dayOfWeek === 0 || $date->dayOfWeek === 6,
-                'events' => $events[$key] ?? [],
-            ];
-        }
-
-        while (count($cells) % 7 !== 0) {
-            $cells[] = null;
-        }
-
-        $rows = array_chunk($cells, 7);
-
-        $prev = $start->copy()->subMonth();
-        $next = $start->copy()->addMonth();
-
-        return [
-            'title' => $start->translatedFormat('F Y'),
-            'rows' => $rows,
-            'prev' => ['bulan' => $prev->month, 'tahun' => $prev->year],
-            'next' => ['bulan' => $next->month, 'tahun' => $next->year],
-        ];
+            })
+            ->sortByDesc(fn (array $item) => $item['bulan'] ?? '')
+            ->values();
     }
 
     /**

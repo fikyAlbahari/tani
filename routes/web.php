@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalTanamController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PemupukanController;
 use App\Http\Controllers\PenyemprotanController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'landing')->name('home');
+Route::get('/', [LandingController::class, 'index'])->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
@@ -21,4 +23,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('jadwal', JadwalTanamController::class)->parameters(['jadwal' => 'jadwal'])->except('show');
     Route::resource('pemupukan', PemupukanController::class)->except('show');
     Route::resource('penyemprotan', PenyemprotanController::class)->except('show');
+    Route::resource('biaya', BiayaController::class)->except('show');
 });

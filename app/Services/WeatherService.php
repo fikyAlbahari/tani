@@ -100,7 +100,7 @@ class WeatherService
             'https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s'.
             '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,is_day'.
             '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'.
-            '&timezone=Asia%%2FJakarta&forecast_days=4',
+            '&timezone=Asia%%2FMakassar&forecast_days=4',
             $lat,
             $lon
         );
