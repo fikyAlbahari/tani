@@ -16,7 +16,9 @@ class JadwalTanamController extends Controller
         if ($request->filled('q')) {
             $q = $request->string('q')->toString();
             $query->where(fn ($w) => $w->where('nama_tanaman', 'like', "%{$q}%")
-                ->orWhere('varietas_benih', 'like', "%{$q}%"));
+                ->orWhere('varietas_benih', 'like', "%{$q}%")
+                ->orWhere('lokasi', 'like', "%{$q}%")
+                ->orWhere('nama_penggarap', 'like', "%{$q}%"));
         }
 
         if ($request->filled('status')) {
@@ -76,6 +78,8 @@ class JadwalTanamController extends Controller
             'nama_tanaman' => ['required', 'string', 'max:100'],
             'varietas_benih' => ['nullable', 'string', 'max:100'],
             'luas_lahan' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+            'lokasi' => ['nullable', 'string', 'max:150'],
+            'nama_penggarap' => ['nullable', 'string', 'max:100'],
             'tanggal_tanam' => ['required', 'date'],
             'perkiraan_panen' => ['nullable', 'date', 'after_or_equal:tanggal_tanam'],
             'status' => ['required', 'in:'.implode(',', JadwalTanam::STATUSES)],

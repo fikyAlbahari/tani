@@ -49,6 +49,18 @@
                     </div>
 
                     <div>
+                        <label for="lokasi" class="label">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="input"
+                               value="{{ old('lokasi', $item->lokasi) }}" placeholder="Contoh: Blok Utara, Desa Sukamaju">
+                    </div>
+
+                    <div>
+                        <label for="nama_penggarap" class="label">Nama Penggarap</label>
+                        <input type="text" id="nama_penggarap" name="nama_penggarap" class="input"
+                               value="{{ old('nama_penggarap', $item->nama_penggarap) }}" placeholder="Contoh: Pak Budi">
+                    </div>
+
+                    <div>
                         <label for="status" class="label">Status <span class="field-req">*</span></label>
                         <select id="status" name="status" class="select" required>
                             @foreach ($statuses as $status)

@@ -24,7 +24,7 @@
                 <div class="relative min-w-[220px] flex-1">
                     <i class="bi bi-search absolute top-1/2 left-3.5 -translate-y-1/2 text-ink/30"></i>
                     <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" class="input pl-10"
-                           placeholder="Cari tanaman / varietas benih...">
+                           placeholder="Cari tanaman / varietas / lokasi / penggarap...">
                 </div>
                 <select name="status" class="select w-auto">
                     <option value="">Semua Status</option>
@@ -53,6 +53,8 @@
                         <tr>
                             <th class="th rounded-tl-2xl">#</th>
                             <th class="th">Tanaman &amp; Benih</th>
+                            <th class="th">Lokasi</th>
+                            <th class="th">Penggarap</th>
                             <th class="th">Luas</th>
                             <th class="th">Tanam</th>
                             <th class="th">Panen</th>
@@ -68,6 +70,8 @@
                                     <span class="block text-[13.5px] font-bold text-ink">{{ $row->nama_tanaman }}</span>
                                     <span class="block text-[11.5px] font-semibold text-ink/45">{{ $row->varietas_benih ?: 'Varietas -' }}</span>
                                 </td>
+                                <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->lokasi ?: '-' }}</td>
+                                <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->nama_penggarap ?: '-' }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->luas_lahan ? $row->luas_lahan.' ha' : '-' }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->tanggal_tanam?->format('d M Y') }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->perkiraan_panen?->format('d M Y') ?: '-' }}</td>

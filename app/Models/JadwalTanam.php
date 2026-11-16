@@ -11,6 +11,8 @@ class JadwalTanam extends Model
         'nama_tanaman',
         'varietas_benih',
         'luas_lahan',
+        'lokasi',
+        'nama_penggarap',
         'tanggal_tanam',
         'perkiraan_panen',
         'status',
