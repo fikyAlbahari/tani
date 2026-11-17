@@ -16,6 +16,7 @@ class BiayaController extends Controller
         if ($request->filled('q')) {
             $q = $request->string('q')->toString();
             $query->where(fn ($w) => $w->where('nama_tanaman', 'like', "%{$q}%")
+                ->orWhere('lokasi', 'like', "%{$q}%")
                 ->orWhere('uraian', 'like', "%{$q}%")
                 ->orWhere('bulan_tanam', 'like', "%{$q}%"));
         }
@@ -103,6 +104,7 @@ class BiayaController extends Controller
         return $request->validate([
             'tanggal' => ['required', 'date'],
             'nama_tanaman' => ['required', 'string', 'max:100'],
+            'lokasi' => ['nullable', 'string', 'max:150'],
             'bulan_tanam' => ['nullable', 'date_format:Y-m'],
             'kategori' => ['required', 'in:'.implode(',', Biaya::KATEGORIS)],
             'uraian' => ['required', 'string', 'max:150'],

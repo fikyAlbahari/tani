@@ -43,6 +43,12 @@
                     </div>
 
                     <div>
+                        <label for="lokasi" class="label">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="input"
+                               value="{{ old('lokasi', $item->lokasi) }}" placeholder="Contoh: Blok Utara, Desa Sukamaju">
+                    </div>
+
+                    <div>
                         <label for="jenis_pupuk" class="label">Jenis Pupuk <span class="field-req">*</span></label>
                         <input type="text" id="jenis_pupuk" name="jenis_pupuk" class="input"
                                value="{{ old('jenis_pupuk', $item->jenis_pupuk) }}" placeholder="Contoh: NPK, Urea, Kandang" required>

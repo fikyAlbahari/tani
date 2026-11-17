@@ -16,6 +16,7 @@ class PenyemprotanController extends Controller
         if ($request->filled('q')) {
             $q = $request->string('q')->toString();
             $query->where(fn ($w) => $w->where('nama_tanaman', 'like', "%{$q}%")
+                ->orWhere('lokasi', 'like', "%{$q}%")
                 ->orWhere('jenis_pestisida', 'like', "%{$q}%")
                 ->orWhere('target_hama', 'like', "%{$q}%"));
         }
@@ -76,6 +77,7 @@ class PenyemprotanController extends Controller
         return $request->validate([
             'tanggal' => ['required', 'date'],
             'nama_tanaman' => ['required', 'string', 'max:100'],
+            'lokasi' => ['nullable', 'string', 'max:150'],
             'jenis_pestisida' => ['required', 'string', 'max:100'],
             'dosis' => ['nullable', 'string', 'max:50'],
             'target_hama' => ['nullable', 'string', 'max:100'],

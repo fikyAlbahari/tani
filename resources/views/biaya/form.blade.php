@@ -30,6 +30,7 @@
                 @include('partials.form-errors')
 
                 <div class="grid gap-4 sm:grid-cols-2">
+                    
                     <div>
                         <label for="tanggal" class="label">Tanggal Biaya <span class="field-req">*</span></label>
                         <input type="date" id="tanggal" name="tanggal" class="input"
@@ -40,6 +41,12 @@
                         <label for="nama_tanaman" class="label">Nama Tanaman <span class="field-req">*</span></label>
                         <input type="text" id="nama_tanaman" name="nama_tanaman" class="input"
                                value="{{ old('nama_tanaman', $item->nama_tanaman) }}" placeholder="Contoh: Padi IR-64, Jagung" required>
+                    </div>
+
+                    <div>
+                        <label for="lokasi" class="label">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="input"
+                               value="{{ old('lokasi', $item->lokasi) }}" placeholder="Contoh: Blok Utara, Desa Sukamaju">
                     </div>
 
                     <div>

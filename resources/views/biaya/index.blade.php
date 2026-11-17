@@ -24,7 +24,7 @@
                 <div class="relative min-w-[220px] flex-1">
                     <i class="bi bi-search absolute top-1/2 left-3.5 -translate-y-1/2 text-ink/30"></i>
                     <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" class="input pl-10"
-                           placeholder="Cari tanaman / bulan tanam / uraian biaya...">
+                           placeholder="Cari tanaman / lokasi / bulan tanam / uraian biaya...">
                 </div>
                 <select name="kategori" class="select w-auto">
                     <option value="">Semua Kategori</option>
@@ -69,6 +69,7 @@
                             <th class="th rounded-tl-2xl">#</th>
                             <th class="th">Tanggal</th>
                             <th class="th">Tanaman</th>
+                            <th class="th">Lokasi</th>
                             <th class="th">Bulan Tanam</th>
                             <th class="th">Kategori</th>
                             <th class="th">Uraian</th>
@@ -82,6 +83,7 @@
                                 <td class="td text-[12.5px] font-bold text-ink/35">{{ $items->firstItem() + $i }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->tanggal->format('d M Y') }}</td>
                                 <td class="td text-[13.5px] font-bold text-ink">{{ $row->nama_tanaman }}</td>
+                                <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->lokasi ?: '-' }}</td>
                                 <td class="td max-w-[180px]">
                                     @if ($row->bulan_tanam)
                                         <span class="badge badge-info"><i class="bi bi-calendar3"></i> {{ $row->bulanLabel() }}</span>

@@ -10,6 +10,7 @@ class Penyemprotan extends Model
     protected $fillable = [
         'tanggal',
         'nama_tanaman',
+        'lokasi',
         'jenis_pestisida',
         'dosis',
         'target_hama',

@@ -10,6 +10,7 @@ class Pemupukan extends Model
     protected $fillable = [
         'tanggal',
         'nama_tanaman',
+        'lokasi',
         'jenis_pupuk',
         'dosis',
         'metode',

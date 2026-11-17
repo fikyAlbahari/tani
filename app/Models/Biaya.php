@@ -12,6 +12,7 @@ class Biaya extends Model
     protected $fillable = [
         'tanggal',
         'nama_tanaman',
+        'lokasi',
         'bulan_tanam',
         'kategori',
         'uraian',

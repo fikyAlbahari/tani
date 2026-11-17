@@ -43,6 +43,12 @@
                     </div>
 
                     <div>
+                        <label for="lokasi" class="label">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="input"
+                               value="{{ old('lokasi', $item->lokasi) }}" placeholder="Contoh: Blok Utara, Desa Sukamaju">
+                    </div>
+
+                    <div>
                         <label for="jenis_pestisida" class="label">Jenis Pestisida / Obat <span class="field-req">*</span></label>
                         <input type="text" id="jenis_pestisida" name="jenis_pestisida" class="input"
                                value="{{ old('jenis_pestisida', $item->jenis_pestisida) }}" placeholder="Contoh: Imidakloprid, Nabati" required>
