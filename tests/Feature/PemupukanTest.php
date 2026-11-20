@@ -58,4 +58,30 @@ class PemupukanTest extends TestCase
         $response->assertOk();
         $this->assertSame(2, substr_count($response->getContent(), 'Pemupukan ke-1'));
     }
+
+    public function test_urutan_pemupukan_dihitung_terpisah_per_lokasi(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([
+            ['lokasi' => 'Blok Utara', 'hari' => 0],
+            ['lokasi' => 'Blok Utara', 'hari' => 1],
+            ['lokasi' => 'Blok Selatan', 'hari' => 2],
+        ] as $data) {
+            Pemupukan::create([
+                'tanggal' => now()->addDays($data['hari'])->toDateString(),
+                'nama_tanaman' => 'Padi',
+                'lokasi' => $data['lokasi'],
+                'jenis_pupuk' => 'Urea',
+                'status' => 'Terjadwal',
+                'user_id' => $user->id,
+            ]);
+        }
+
+        $response = $this->actingAs($user)->get(route('pemupukan.index'));
+
+        $response->assertOk();
+        $this->assertSame(2, substr_count($response->getContent(), 'Pemupukan ke-1'));
+        $this->assertSame(1, substr_count($response->getContent(), 'Pemupukan ke-2'));
+    }
 }

@@ -37,7 +37,23 @@ class Pemupukan extends Model
     }
 
     /**
-     * Nomor urut pemupukan tiap tanaman berdasarkan tanggal pelaksanaan.
+     * Kunci pengelompokan urutan pemupukan.
+     *
+     * Pemupukan dihitung per lokasi agar tiap lahan punya urutan pertama/kedua
+     * sendiri. Bila lokasi belum diisi, urutan dihitung per nama tanaman.
+     */
+    public static function kunciUrutan(self $item): string
+    {
+        $lokasi = mb_strtolower(trim((string) $item->lokasi));
+        $tanaman = mb_strtolower(trim((string) $item->nama_tanaman));
+
+        return $lokasi !== ''
+            ? 'lokasi:'.$lokasi.'|tanaman:'.$tanaman
+            : 'tanaman:'.$tanaman;
+    }
+
+    /**
+     * Nomor urut pemupukan berdasarkan lokasi lahan dan tanggal pelaksanaan.
      *
      * @param  Collection<int, self>  $items
      * @return array<int, int>
@@ -51,13 +67,12 @@ class Pemupukan extends Model
         $urutan = [];
 
         static::query()
-            ->whereIn('nama_tanaman', $items->pluck('nama_tanaman')->unique()->all())
             ->orderBy('tanggal')
             ->orderBy('id')
-            ->get(['id', 'nama_tanaman'])
-            ->groupBy('nama_tanaman')
-            ->each(function ($rows) use (&$urutan) {
-                $rows->values()->each(function ($row, $index) use (&$urutan) {
+            ->get(['id', 'nama_tanaman', 'lokasi'])
+            ->groupBy(fn (self $row) => static::kunciUrutan($row))
+            ->each(function (Collection $rows) use (&$urutan) {
+                $rows->values()->each(function (self $row, int $index) use (&$urutan) {
                     $urutan[$row->id] = $index + 1;
                 });
             });
