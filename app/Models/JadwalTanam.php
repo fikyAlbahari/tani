@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JadwalTanam extends Model
 {
@@ -31,6 +32,21 @@ class JadwalTanam extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pemupukans(): HasMany
+    {
+        return $this->hasMany(Pemupukan::class);
+    }
+
+    public function penyemprotans(): HasMany
+    {
+        return $this->hasMany(Penyemprotan::class);
+    }
+
+    public function biayas(): HasMany
+    {
+        return $this->hasMany(Biaya::class);
     }
 
     public function statusClass(): string

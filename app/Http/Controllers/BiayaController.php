@@ -3,49 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Biaya;
+use App\Models\JadwalTanam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BiayaController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $query = Biaya::query()->orderByDesc('tanggal');
-
-        if ($request->filled('q')) {
-            $q = $request->string('q')->toString();
-            $query->where(fn ($w) => $w->where('nama_tanaman', 'like', "%{$q}%")
-                ->orWhere('lokasi', 'like', "%{$q}%")
-                ->orWhere('uraian', 'like', "%{$q}%")
-                ->orWhere('bulan_tanam', 'like', "%{$q}%"));
-        }
-
-        if ($request->filled('kategori')) {
-            $query->where('kategori', $request->string('kategori')->toString());
-        }
-
-        if ($request->filled('bulan')) {
-            $query->where('bulan_tanam', $request->string('bulan')->toString());
-        }
-
-        $total = (clone $query)->sum('jumlah');
+        $jadwals = JadwalTanam::query()
+            ->withCount('biayas')
+            ->withSum('biayas', 'jumlah')
+            ->orderByDesc('tanggal_tanam')
+            ->get();
 
         return view('biaya.index', [
-            'items' => $query->paginate(10)->withQueryString(),
-            'kategoris' => Biaya::KATEGORIS,
-            'bulans' => $this->bulanOptions(),
-            'filters' => $request->only(['q', 'kategori', 'bulan']),
-            'total' => $total,
+            'jadwals' => $jadwals,
         ]);
     }
 
-    public function create(): View
+    public function kelola(Request $request): View
     {
+        $jadwals = JadwalTanam::query()->orderByDesc('tanggal_tanam')->get();
+
+        $jadwal = $request->filled('jadwal')
+            ? JadwalTanam::find($request->integer('jadwal'))
+            : $jadwals->first();
+
+        $items = $jadwal
+            ? Biaya::where('jadwal_tanam_id', $jadwal->id)->orderByDesc('tanggal')->orderByDesc('id')->get()
+            : collect();
+
+        return view('biaya.kelola', [
+            'jadwals' => $jadwals,
+            'jadwal' => $jadwal,
+            'items' => $items,
+            'kategoris' => Biaya::KATEGORIS,
+            'total' => (float) $items->sum(fn (Biaya $biaya) => (float) $biaya->jumlah),
+        ]);
+    }
+
+    public function create(Request $request): View
+    {
+        $jadwal = $this->jadwalDari($request);
+
         return view('biaya.form', [
-            'item' => new Biaya(['tanggal' => now()->toDateString()]),
+            'item' => new Biaya([
+                'tanggal' => now()->toDateString(),
+                'jadwal_tanam_id' => $jadwal?->id,
+                'nama_tanaman' => $jadwal?->nama_tanaman,
+                'lokasi' => $jadwal?->lokasi,
+                'bulan_tanam' => $jadwal?->tanggal_tanam?->format('Y-m'),
+            ]),
             'kategoris' => Biaya::KATEGORIS,
             'bulans' => $this->bulanOptions(),
+            'jadwal' => $jadwal,
+            'dariJadwal' => $jadwal !== null,
         ]);
     }
 
@@ -55,17 +69,20 @@ class BiayaController extends Controller
         $data['bulan_tanam'] = ($data['bulan_tanam'] ?? null) ?: null;
         $data['user_id'] = $request->user()->id;
 
-        Biaya::create($data);
+        $biaya = Biaya::create($data);
 
-        return redirect()->route('biaya.index')->with('success', 'Biaya tanam berhasil ditambahkan.');
+        return $this->kembali($request, $biaya->jadwal_tanam_id)
+            ->with('success', 'Biaya tanam berhasil ditambahkan.');
     }
 
-    public function edit(Biaya $biaya): View
+    public function edit(Request $request, Biaya $biaya): View
     {
         return view('biaya.form', [
             'item' => $biaya,
             'kategoris' => Biaya::KATEGORIS,
             'bulans' => $this->bulanOptions(),
+            'jadwal' => $biaya->jadwalTanam,
+            'dariJadwal' => $request->query('asal') === 'kelola',
         ]);
     }
 
@@ -76,14 +93,31 @@ class BiayaController extends Controller
 
         $biaya->update($data);
 
-        return redirect()->route('biaya.index')->with('success', 'Biaya tanam berhasil diperbarui.');
+        return $this->kembali($request, $biaya->jadwal_tanam_id)
+            ->with('success', 'Biaya tanam berhasil diperbarui.');
     }
 
-    public function destroy(Biaya $biaya): RedirectResponse
+    public function destroy(Request $request, Biaya $biaya): RedirectResponse
     {
+        $jadwalId = $biaya->jadwal_tanam_id ?? ($request->integer('jadwal_tanam_id') ?: null);
+
         $biaya->delete();
 
-        return redirect()->route('biaya.index')->with('success', 'Biaya tanam berhasil dihapus.');
+        return $this->kembali($request, $jadwalId)->with('success', 'Biaya tanam berhasil dihapus.');
+    }
+
+    private function jadwalDari(Request $request): ?JadwalTanam
+    {
+        return $request->filled('jadwal')
+            ? JadwalTanam::find($request->integer('jadwal'))
+            : null;
+    }
+
+    private function kembali(Request $request, ?int $jadwalId): RedirectResponse
+    {
+        return $jadwalId && $request->input('asal') === 'kelola'
+            ? redirect()->route('biaya.kelola', ['jadwal' => $jadwalId])
+            : redirect()->route('biaya.index');
     }
 
     /**
@@ -102,6 +136,7 @@ class BiayaController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
+            'jadwal_tanam_id' => ['nullable', 'exists:jadwal_tanams,id'],
             'tanggal' => ['required', 'date'],
             'nama_tanaman' => ['required', 'string', 'max:100'],
             'lokasi' => ['nullable', 'string', 'max:150'],

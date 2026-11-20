@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 class Pemupukan extends Model
 {
     protected $fillable = [
+        'jadwal_tanam_id',
         'tanggal',
         'nama_tanaman',
         'lokasi',
@@ -31,6 +32,11 @@ class Pemupukan extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function jadwalTanam(): BelongsTo
+    {
+        return $this->belongsTo(JadwalTanam::class);
+    }
+
     public function statusClass(): string
     {
         return JadwalTanam::badgeFor((string) $this->status);
@@ -50,6 +56,28 @@ class Pemupukan extends Model
         return $lokasi !== ''
             ? 'lokasi:'.$lokasi.'|tanaman:'.$tanaman
             : 'tanaman:'.$tanaman;
+    }
+
+    /**
+     * Nomor urut pemupukan dari koleksi yang diberikan.
+     *
+     * @param  Collection<int, self>  $items
+     * @return array<int, int>
+     */
+    public static function urutanKoleksi(Collection $items): array
+    {
+        $urutan = [];
+
+        $items
+            ->sortBy([['tanggal', 'asc'], ['id', 'asc']])
+            ->groupBy(fn (self $row) => static::kunciUrutan($row))
+            ->each(function (Collection $rows) use (&$urutan) {
+                $rows->values()->each(function (self $row, int $index) use (&$urutan) {
+                    $urutan[$row->id] = $index + 1;
+                });
+            });
+
+        return $urutan;
     }
 
     /**

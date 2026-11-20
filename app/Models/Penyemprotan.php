@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Penyemprotan extends Model
 {
     protected $fillable = [
+        'jadwal_tanam_id',
         'tanggal',
         'nama_tanaman',
         'lokasi',
@@ -28,6 +29,11 @@ class Penyemprotan extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function jadwalTanam(): BelongsTo
+    {
+        return $this->belongsTo(JadwalTanam::class);
     }
 
     public function statusClass(): string

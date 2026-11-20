@@ -22,8 +22,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('jadwal', JadwalTanamController::class)->parameters(['jadwal' => 'jadwal'])->except('show');
+    Route::get('pemupukan/kelola', [PemupukanController::class, 'kelola'])->name('pemupukan.kelola');
     Route::resource('pemupukan', PemupukanController::class)->except('show');
+    Route::get('penyemprotan/kelola', [PenyemprotanController::class, 'kelola'])->name('penyemprotan.kelola');
     Route::resource('penyemprotan', PenyemprotanController::class)->except('show');
+    Route::get('biaya/kelola', [BiayaController::class, 'kelola'])->name('biaya.kelola');
     Route::resource('biaya', BiayaController::class)->except('show');
     Route::resource('penjualan', PenjualanController::class)->except('show');
 });

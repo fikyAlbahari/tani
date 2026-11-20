@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JadwalTanam;
 use App\Models\Penyemprotan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -9,34 +10,53 @@ use Illuminate\View\View;
 
 class PenyemprotanController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $query = Penyemprotan::query()->orderByDesc('tanggal');
-
-        if ($request->filled('q')) {
-            $q = $request->string('q')->toString();
-            $query->where(fn ($w) => $w->where('nama_tanaman', 'like', "%{$q}%")
-                ->orWhere('lokasi', 'like', "%{$q}%")
-                ->orWhere('jenis_pestisida', 'like', "%{$q}%")
-                ->orWhere('target_hama', 'like', "%{$q}%"));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->string('status')->toString());
-        }
+        $jadwals = JadwalTanam::query()
+            ->withCount('penyemprotans')
+            ->orderByDesc('tanggal_tanam')
+            ->get();
 
         return view('penyemprotan.index', [
-            'items' => $query->paginate(10)->withQueryString(),
-            'statuses' => Penyemprotan::STATUSES,
-            'filters' => $request->only(['q', 'status']),
+            'jadwals' => $jadwals,
         ]);
     }
 
-    public function create(): View
+    public function kelola(Request $request): View
     {
-        return view('penyemprotan.form', [
-            'item' => new Penyemprotan(['status' => 'Terjadwal', 'tanggal' => now()->toDateString()]),
+        $jadwals = JadwalTanam::query()->orderByDesc('tanggal_tanam')->get();
+
+        $jadwal = $request->filled('jadwal')
+            ? JadwalTanam::find($request->integer('jadwal'))
+            : $jadwals->first();
+
+        $items = $jadwal
+            ? Penyemprotan::where('jadwal_tanam_id', $jadwal->id)->orderByDesc('tanggal')->orderByDesc('id')->get()
+            : collect();
+
+        return view('penyemprotan.kelola', [
+            'jadwals' => $jadwals,
+            'jadwal' => $jadwal,
+            'items' => $items,
             'statuses' => Penyemprotan::STATUSES,
+        ]);
+    }
+
+    public function create(Request $request): View
+    {
+        $jadwal = $this->jadwalDari($request);
+
+        return view('penyemprotan.form', [
+            'item' => new Penyemprotan([
+                'status' => 'Terjadwal',
+                'tanggal' => now()->toDateString(),
+                'jadwal_tanam_id' => $jadwal?->id,
+                'nama_tanaman' => $jadwal?->nama_tanaman,
+                'lokasi' => $jadwal?->lokasi,
+            ]),
+            'statuses' => Penyemprotan::STATUSES,
+            'jadwal' => $jadwal,
+            'dariJadwal' => $jadwal !== null,
         ]);
     }
 
@@ -45,16 +65,19 @@ class PenyemprotanController extends Controller
         $data = $this->validated($request);
         $data['user_id'] = $request->user()->id;
 
-        Penyemprotan::create($data);
+        $penyemprotan = Penyemprotan::create($data);
 
-        return redirect()->route('penyemprotan.index')->with('success', 'Jadwal penyemprotan berhasil ditambahkan.');
+        return $this->kembali($request, $penyemprotan->jadwal_tanam_id)
+            ->with('success', 'Jadwal penyemprotan berhasil ditambahkan.');
     }
 
-    public function edit(Penyemprotan $penyemprotan): View
+    public function edit(Request $request, Penyemprotan $penyemprotan): View
     {
         return view('penyemprotan.form', [
             'item' => $penyemprotan,
             'statuses' => Penyemprotan::STATUSES,
+            'jadwal' => $penyemprotan->jadwalTanam,
+            'dariJadwal' => $request->query('asal') === 'kelola',
         ]);
     }
 
@@ -62,19 +85,37 @@ class PenyemprotanController extends Controller
     {
         $penyemprotan->update($this->validated($request));
 
-        return redirect()->route('penyemprotan.index')->with('success', 'Jadwal penyemprotan berhasil diperbarui.');
+        return $this->kembali($request, $penyemprotan->jadwal_tanam_id)
+            ->with('success', 'Jadwal penyemprotan berhasil diperbarui.');
     }
 
-    public function destroy(Penyemprotan $penyemprotan): RedirectResponse
+    public function destroy(Request $request, Penyemprotan $penyemprotan): RedirectResponse
     {
+        $jadwalId = $penyemprotan->jadwal_tanam_id ?? ($request->integer('jadwal_tanam_id') ?: null);
+
         $penyemprotan->delete();
 
-        return redirect()->route('penyemprotan.index')->with('success', 'Jadwal penyemprotan dihapus.');
+        return $this->kembali($request, $jadwalId)->with('success', 'Jadwal penyemprotan dihapus.');
+    }
+
+    private function jadwalDari(Request $request): ?JadwalTanam
+    {
+        return $request->filled('jadwal')
+            ? JadwalTanam::find($request->integer('jadwal'))
+            : null;
+    }
+
+    private function kembali(Request $request, ?int $jadwalId): RedirectResponse
+    {
+        return $jadwalId && $request->input('asal') === 'kelola'
+            ? redirect()->route('penyemprotan.kelola', ['jadwal' => $jadwalId])
+            : redirect()->route('penyemprotan.index');
     }
 
     private function validated(Request $request): array
     {
         return $request->validate([
+            'jadwal_tanam_id' => ['nullable', 'exists:jadwal_tanams,id'],
             'tanggal' => ['required', 'date'],
             'nama_tanaman' => ['required', 'string', 'max:100'],
             'lokasi' => ['nullable', 'string', 'max:150'],

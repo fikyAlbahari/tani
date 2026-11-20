@@ -4,6 +4,8 @@
 ])
 
 @section('content')
+    @php($dariJadwal = $dariJadwal ?? false)
+    @php($kembali = $dariJadwal && $jadwal ? route('penyemprotan.kelola', ['jadwal' => $jadwal]) : route('penyemprotan.index'))
     <div class="mx-auto max-w-3xl">
         <div class="card">
             <div class="flex items-center justify-between gap-3 border-b border-ink/[.07] px-5 py-4 sm:px-6">
@@ -18,11 +20,15 @@
                         <p class="text-[12px] font-semibold text-ink/40">Kolom bertanda <span class="text-rose-500">*</span> wajib diisi</p>
                     </div>
                 </div>
-                <a href="{{ route('penyemprotan.index') }}" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+                <a href="{{ $kembali }}" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
             </div>
 
             <form method="POST" action="{{ $item->exists ? route('penyemprotan.update', $item) : route('penyemprotan.store') }}" class="p-5 sm:p-6">
                 @csrf
+                @if ($dariJadwal)
+                    <input type="hidden" name="asal" value="kelola">
+                @endif
+                <input type="hidden" name="jadwal_tanam_id" value="{{ old('jadwal_tanam_id', $item->jadwal_tanam_id) }}">
                 @if ($item->exists)
                     @method('PUT')
                 @endif
@@ -84,7 +90,7 @@
 
                 <div class="mt-6 flex flex-wrap gap-3 border-t border-ink/[.06] pt-5">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> Simpan</button>
-                    <a href="{{ route('penyemprotan.index') }}" class="btn btn-ghost">Batal</a>
+                    <a href="{{ $kembali }}" class="btn btn-ghost">Batal</a>
                 </div>
             </form>
         </div>

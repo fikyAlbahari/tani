@@ -10,6 +10,7 @@ use Throwable;
 class Biaya extends Model
 {
     protected $fillable = [
+        'jadwal_tanam_id',
         'tanggal',
         'nama_tanaman',
         'lokasi',
@@ -46,6 +47,11 @@ class Biaya extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function jadwalTanam(): BelongsTo
+    {
+        return $this->belongsTo(JadwalTanam::class);
     }
 
     public function bulanLabel(): string

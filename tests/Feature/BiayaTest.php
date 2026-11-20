@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Biaya;
+use App\Models\JadwalTanam;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -12,52 +13,73 @@ class BiayaTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function jadwal(User $user, string $nama, string $tanggal): JadwalTanam
+    {
+        return JadwalTanam::create([
+            'nama_tanaman' => $nama,
+            'varietas_benih' => 'IR-64',
+            'lokasi' => 'Blok Utara',
+            'nama_penggarap' => 'Pak Budi',
+            'tanggal_tanam' => $tanggal,
+            'status' => 'Ditanam',
+            'user_id' => $user->id,
+        ]);
+    }
+
     public function test_user_bisa_menambah_biaya_dan_melihat_totalnya(): void
     {
         $user = User::factory()->create();
+        $jadwal = $this->jadwal($user, 'Padi IR-64', now()->toDateString());
 
-        $response = $this->actingAs($user)->post(route('biaya.store'), [
+        $this->actingAs($user)->post(route('biaya.store'), [
+            'jadwal_tanam_id' => $jadwal->id,
+            'asal' => 'kelola',
             'tanggal' => now()->toDateString(),
             'nama_tanaman' => 'Padi IR-64',
+            'bulan_tanam' => now()->format('Y-m'),
             'kategori' => 'Bibit',
             'uraian' => 'Beli benih padi 10 kg',
             'jumlah' => 250000,
-        ]);
+        ])->assertRedirect(route('biaya.kelola', ['jadwal' => $jadwal->id]));
 
-        $response->assertRedirect(route('biaya.index'));
         $this->assertDatabaseHas('biayas', [
+            'jadwal_tanam_id' => $jadwal->id,
             'nama_tanaman' => 'Padi IR-64',
             'kategori' => 'Bibit',
             'jumlah' => 250000,
         ]);
 
         $this->actingAs($user)
-            ->get(route('biaya.index'))
+            ->get(route('biaya.kelola', ['jadwal' => $jadwal->id]))
             ->assertOk()
-            ->assertSee('Padi IR-64')
+            ->assertSee('Beli benih padi 10 kg')
             ->assertSee('Rp 250.000');
     }
 
     public function test_biaya_bisa_dikelompokkan_per_bulan_tanam(): void
     {
         $user = User::factory()->create();
+        $jadwal = $this->jadwal($user, 'Padi IR-64', '2026-11-01');
 
         $this->actingAs($user)->post(route('biaya.store'), [
-            'tanggal' => now()->toDateString(),
+            'jadwal_tanam_id' => $jadwal->id,
+            'asal' => 'kelola',
+            'tanggal' => '2026-11-01',
             'nama_tanaman' => 'Padi IR-64',
             'bulan_tanam' => '2026-11',
             'kategori' => 'Bibit',
             'uraian' => 'Beli benih padi 10 kg',
             'jumlah' => 250000,
-        ])->assertRedirect(route('biaya.index'));
+        ])->assertRedirect(route('biaya.kelola', ['jadwal' => $jadwal->id]));
 
         $this->assertDatabaseHas('biayas', [
+            'jadwal_tanam_id' => $jadwal->id,
             'nama_tanaman' => 'Padi IR-64',
             'bulan_tanam' => '2026-11',
         ]);
 
         $this->actingAs($user)
-            ->get(route('biaya.index', ['bulan' => '2026-11']))
+            ->get(route('biaya.kelola', ['jadwal' => $jadwal->id]))
             ->assertOk()
             ->assertSee('November 2026')
             ->assertSee('Rp 250.000');
