@@ -54,6 +54,8 @@ class LandingTest extends TestCase
             'nama_tanaman' => 'Padi IR-64',
             'varietas_benih' => 'IR-64',
             'luas_lahan' => 1.5,
+            'lokasi' => 'Blok Utara',
+            'nama_penggarap' => 'Pak Budi',
             'tanggal_tanam' => now()->subDays(10)->toDateString(),
             'status' => 'Tumbuh',
         ]);
@@ -65,10 +67,25 @@ class LandingTest extends TestCase
             'status' => 'Terjadwal',
         ]);
 
+        Pemupukan::create([
+            'tanggal' => now()->addDays(20)->toDateString(),
+            'nama_tanaman' => 'Cabai Merah',
+            'jenis_pupuk' => 'Urea',
+            'status' => 'Terjadwal',
+        ]);
+
+        Pemupukan::create([
+            'tanggal' => now()->addDays(40)->toDateString(),
+            'nama_tanaman' => 'Cabai Merah',
+            'jenis_pupuk' => 'Kandang',
+            'status' => 'Terjadwal',
+        ]);
+
         Penyemprotan::create([
             'tanggal' => now()->addDays(3)->toDateString(),
             'nama_tanaman' => 'Jagung Manis',
             'jenis_pestisida' => 'Abamektin',
+            'lokasi' => 'Blok Selatan',
             'status' => 'Terjadwal',
         ]);
 
@@ -82,8 +99,14 @@ class LandingTest extends TestCase
         $response->assertSee(now()->translatedFormat('F Y'));
         $response->assertDontSee('Kelola di dashboard admin');
         $response->assertSee('Padi IR-64');
+        $response->assertSee('Blok Utara');
+        $response->assertSee('Pak Budi');
         $response->assertSee('NPK Mutiara');
+        $response->assertSee('Pemupukan 1');
+        $response->assertSee('Pemupukan 2');
+        $response->assertDontSee('Pemupukan 3');
         $response->assertSee('Abamektin');
+        $response->assertSee('Blok Selatan');
         $response->assertSee('Berita Pertanian');
         $response->assertSee('Harga Gabah Naik di Lombok Utara');
         $response->assertSee('Antara News');

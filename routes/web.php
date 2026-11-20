@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalTanamController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PemupukanController;
+use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PenyemprotanController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('pemupukan', PemupukanController::class)->except('show');
     Route::resource('penyemprotan', PenyemprotanController::class)->except('show');
     Route::resource('biaya', BiayaController::class)->except('show');
+    Route::resource('penjualan', PenjualanController::class)->except('show');
 });

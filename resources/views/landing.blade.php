@@ -188,14 +188,14 @@
                         </div>
                     @endif
 
-                    <div class="relative mt-3 flex items-center justify-between text-[10.5px] font-semibold text-white/55">
+                    <!-- <div class="relative mt-3 flex items-center justify-between text-[10.5px] font-semibold text-white/55">
                         <span>
                             @if (!empty($weather['fetched_at']))
                                 Diperbarui pukul {{ \Carbon\Carbon::parse($weather['fetched_at'])->format('H:i') }}
                             @endif
                         </span>
                         <span>Open-Meteo</span>
-                    </div>
+                    </div> -->
                 @endif
             </div>
 
@@ -210,7 +210,7 @@
                         </span>
                         <div>
                             <h3 class="text-[15px] font-extrabold tracking-tight">Jadwal Tanam</h3>
-                            <p class="text-[11.5px] font-semibold text-ink/40">Rencana tanam terbaru</p>
+                            <p class="text-[11.5px] font-semibold text-ink/40">Rencana tanam 4 bulan terakhir</p>
                         </div>
                     </div>
                     <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-50 px-2 text-[11.5px] font-extrabold text-sky-700 ring-1 ring-sky-100">
@@ -229,6 +229,11 @@
                                 <p class="truncate text-[13px] font-extrabold text-ink">{{ $row->nama_tanaman }}</p>
                                 <p class="mt-0.5 truncate text-[11px] font-semibold text-ink/45">
                                     {{ $row->varietas_benih ?: 'Benih belum dicatat' }} · {{ $row->luas_lahan ? $row->luas_lahan.' ha' : 'Luas -' }}
+                                </p>
+                                <p class="mt-0.5 truncate text-[11px] font-semibold text-ink/45">
+                                    <i class="bi bi-geo-alt"></i> {{ $row->lokasi ?: 'Lokasi -' }}
+                                    <span class="mx-1 text-ink/20">·</span>
+                                    <i class="bi bi-person"></i> {{ $row->nama_penggarap ?: 'Penggarap -' }}
                                 </p>
                             </div>
                             <span class="badge badge-{{ $row->statusClass() }} shrink-0">{{ $row->status }}</span>
@@ -250,7 +255,7 @@
                         </span>
                         <div>
                             <h3 class="text-[15px] font-extrabold tracking-tight">Pemupukan</h3>
-                            <p class="text-[11.5px] font-semibold text-ink/40">Jadwal pemupukan terbaru</p>
+                            <p class="text-[11.5px] font-semibold text-ink/40">Jadwal pemupukan 4 bulan terakhir</p>
                         </div>
                     </div>
                     <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-amber-50 px-2 text-[11.5px] font-extrabold text-amber-700 ring-1 ring-amber-100">
@@ -266,7 +271,14 @@
                                 <span class="mt-0.5 text-[8.5px] font-extrabold tracking-wide uppercase">{{ $row->tanggal->translatedFormat('M') }}</span>
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-[13px] font-extrabold text-ink">{{ $row->nama_tanaman }}</p>
+                                <p class="flex items-center gap-1.5 text-[13px] font-extrabold text-ink">
+                                    <span class="truncate">{{ $row->nama_tanaman }}</span>
+                                    @if (in_array($urutanPemupukan[$row->id] ?? null, [1, 2], true))
+                                        <span class="badge badge-{{ ($urutanPemupukan[$row->id] ?? null) === 1 ? 'info' : 'warning' }} shrink-0 !px-1.5 !py-0.5 !text-[9px]">
+                                            <span class="h-1 w-1 rounded-full bg-current"></span>Pemupukan {{ $urutanPemupukan[$row->id] }}
+                                        </span>
+                                    @endif
+                                </p>
                                 <p class="mt-0.5 truncate text-[11px] font-semibold text-ink/45"
                                    title="{{ $row->jenis_pupuk }}{{ $row->dosis ? ' · '.$row->dosis : '' }}">
                                     {{ $row->jenis_pupuk }}{{ $row->dosis ? ' · '.$row->dosis : '' }}
@@ -291,7 +303,7 @@
                         </span>
                         <div>
                             <h3 class="text-[15px] font-extrabold tracking-tight">Penyemprotan</h3>
-                            <p class="text-[11.5px] font-semibold text-ink/40">Jadwal penyemprotan terbaru</p>
+                            <p class="text-[11.5px] font-semibold text-ink/40">Jadwal penyemprotan 4 bulan terakhir</p>
                         </div>
                     </div>
                     <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-rose-50 px-2 text-[11.5px] font-extrabold text-rose-600 ring-1 ring-rose-100">
@@ -311,6 +323,9 @@
                                 <p class="mt-0.5 truncate text-[11px] font-semibold text-ink/45"
                                    title="{{ $row->jenis_pestisida }}{{ $row->target_hama ? ' · '.$row->target_hama : '' }}">
                                     {{ $row->jenis_pestisida }}{{ $row->target_hama ? ' · '.$row->target_hama : '' }}
+                                </p>
+                                <p class="mt-0.5 truncate text-[11px] font-semibold text-ink/45">
+                                    <i class="bi bi-geo-alt"></i> {{ $row->lokasi ?: 'Lokasi -' }}
                                 </p>
                             </div>
                             <span class="badge badge-{{ $row->statusClass() }} shrink-0">{{ $row->status }}</span>

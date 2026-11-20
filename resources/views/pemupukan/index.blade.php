@@ -67,7 +67,14 @@
                             <tr class="row-hover">
                                 <td class="td text-[12.5px] font-bold text-ink/35">{{ $items->firstItem() + $i }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->tanggal->format('d M Y') }}</td>
-                                <td class="td text-[13.5px] font-bold text-ink">{{ $row->nama_tanaman }}</td>
+                                <td class="td">
+                                    <span class="block text-[13.5px] font-bold text-ink">{{ $row->nama_tanaman }}</span>
+                                    @if (in_array($urutan[$row->id] ?? null, [1, 2], true))
+                                        <span class="badge badge-{{ ($urutan[$row->id] ?? null) === 1 ? 'info' : 'warning' }} mt-1">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-current"></span>Pemupukan ke-{{ $urutan[$row->id] }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->lokasi ?: '-' }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->jenis_pupuk }}</td>
                                 <td class="td text-[12.5px] font-semibold text-ink/60">{{ $row->dosis ?: '-' }}</td>

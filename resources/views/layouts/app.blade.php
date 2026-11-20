@@ -96,6 +96,14 @@
                 </span>
                 <span class="sidebar-label">Biaya Tanam</span>
             </a>
+
+            <a href="{{ route('penjualan.index') }}" title="Hasil Penjualan"
+               class="sidebar-link {{ request()->routeIs('penjualan.*') ? 'sidebar-link-active' : '' }}">
+                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-base {{ request()->routeIs('penjualan.*') ? 'text-brand-300' : '' }}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </span>
+                <span class="sidebar-label">Hasil Penjualan</span>
+            </a>
         </nav>
 
         <div id="userPanel" class="mt-4 rounded-2xl bg-white/[.06] p-3 ring-1 ring-white/10">

@@ -41,13 +41,14 @@
                 Selamat datang kembali, Admin
             </h2>
             <p class="mt-4 max-w-md text-[15px] leading-relaxed font-medium text-white/65">
-                Kelola jadwal tanam, pemupukan, penyemprotan, dan pantau pertanian lewat satu dashboard.
+                Kelola jadwal tanam, pemupukan, penyemprotan, hasil penjualan, dan pantau pertanian lewat satu dashboard.
             </p>
 
             <ul class="mt-9 space-y-3.5">
                 @foreach ([
                     'Input jadwal tanam benih sampai panen',
                     'Jadwal pemupukan &amp; penyemprotan',
+                    'Catat hasil penjualan panen',
                     'Cuaca, kalender, dan berita pertanian',
                 ] as $feature)
                     <li class="flex items-center gap-3 text-[14.5px] font-semibold text-white/85">

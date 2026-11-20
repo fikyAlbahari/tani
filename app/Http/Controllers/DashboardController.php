@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JadwalTanam;
 use App\Models\Biaya;
 use App\Models\Pemupukan;
+use App\Models\Penjualan;
 use App\Models\Penyemprotan;
 use App\Services\CalendarService;
 use App\Services\NewsService;
@@ -32,6 +33,7 @@ class DashboardController extends Controller
         $pemupukans = Pemupukan::orderBy('tanggal')->get();
         $penyemprotans = Penyemprotan::orderBy('tanggal')->get();
         $biayas = Biaya::orderBy('tanggal')->get();
+        $penjualans = Penjualan::orderBy('tanggal')->get();
 
         return view('dashboard', [
             'stats' => $this->stats($tanams, $pemupukans, $penyemprotans, $biayas, $start, $end),
@@ -43,6 +45,8 @@ class DashboardController extends Controller
             'recentPemupukan' => $pemupukans->sortByDesc('created_at')->take(5)->values(),
             'recentPenyemprotan' => $penyemprotans->sortByDesc('created_at')->take(5)->values(),
             'biayaPerBulanTanam' => $this->biayaPerBulanTanam($biayas),
+            'penjualanSummary' => $this->penjualanSummary($penjualans, $biayas, $start, $end),
+            'recentPenjualan' => $penjualans->sortByDesc('created_at')->take(5)->values(),
         ]);
     }
 
@@ -84,6 +88,30 @@ class DashboardController extends Controller
             })
             ->sortByDesc(fn (array $item) => $item['bulan'] ?? '')
             ->values();
+    }
+
+    /**
+     * @return array{pendapatan_bulan_ini:float,pendapatan_total:float,transaksi_bulan_ini:int,transaksi_total:int,laba_bulan_ini:float}
+     */
+    private function penjualanSummary(Collection $penjualans, Collection $biayas, Carbon $start, Carbon $end): array
+    {
+        $inMonth = fn (Carbon $date) => $date->between($start, $end);
+
+        $penjualanBulanIni = $penjualans
+            ->filter(fn (Penjualan $p) => $p->tanggal && $inMonth($p->tanggal));
+
+        $pendapatanBulanIni = (float) $penjualanBulanIni->sum(fn (Penjualan $p) => (float) $p->total);
+        $biayaBulanIni = (float) $biayas
+            ->filter(fn (Biaya $b) => $b->tanggal && $inMonth($b->tanggal))
+            ->sum(fn (Biaya $b) => (float) $b->jumlah);
+
+        return [
+            'pendapatan_bulan_ini' => $pendapatanBulanIni,
+            'pendapatan_total' => (float) $penjualans->sum(fn (Penjualan $p) => (float) $p->total),
+            'transaksi_bulan_ini' => $penjualanBulanIni->count(),
+            'transaksi_total' => $penjualans->count(),
+            'laba_bulan_ini' => $pendapatanBulanIni - $biayaBulanIni,
+        ];
     }
 
     /**

@@ -24,8 +24,11 @@ class PemupukanController extends Controller
             $query->where('status', $request->string('status')->toString());
         }
 
+        $items = $query->paginate(10)->withQueryString();
+
         return view('pemupukan.index', [
-            'items' => $query->paginate(10)->withQueryString(),
+            'items' => $items,
+            'urutan' => Pemupukan::urutanUntuk($items->getCollection()),
             'statuses' => Pemupukan::STATUSES,
             'filters' => $request->only(['q', 'status']),
         ]);

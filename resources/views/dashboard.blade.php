@@ -53,7 +53,7 @@
                         @endif
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-1.5">
-                        <span class="whitespace-nowrap rounded-full bg-white/15 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur">Live · Open-Meteo</span>
+                        <!-- <span class="whitespace-nowrap rounded-full bg-white/15 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur">Live · Open-Meteo</span> -->
                         <a href="{{ request()->fullUrlWithQuery(['refresh' => 1]) }}"
                            class="whitespace-nowrap rounded-full bg-white/15 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur transition hover:bg-white/30"
                            title="Perbarui data cuaca">
@@ -376,6 +376,79 @@
                     </div>
                 @endforeach
             </div>
+        @endif
+    </section>
+
+    {{-- Hasil Penjualan --}}
+    <section class="card mt-5 overflow-hidden">
+        <div class="flex flex-col gap-3 border-b border-ink/[.07] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div class="flex items-center gap-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white" style="background-image: linear-gradient(135deg,#46cb88,#148f53); box-shadow: 0 10px 18px -12px #148f53;">
+                    <i class="bi bi-graph-up-arrow text-[15px]"></i>
+                </span>
+                <div>
+                    <h2 class="text-[15px] font-extrabold tracking-tight">Hasil Penjualan</h2>
+                    <p class="text-[12px] font-semibold text-ink/40">Pendapatan panen dan laba bulan berjalan</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:shrink-0">
+                <span class="badge badge-muted">{{ $penjualanSummary['transaksi_bulan_ini'] }} transaksi bulan ini</span>
+                <a href="{{ route('penjualan.index') }}" class="text-[12px] font-extrabold text-brand-700 hover:underline">Kelola →</a>
+            </div>
+        </div>
+
+        <div class="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
+            <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+                <p class="flex items-center gap-2 text-[11.5px] font-extrabold tracking-wide text-brand-800/70 uppercase">
+                    <i class="bi bi-calendar3"></i> Pendapatan Bulan Ini
+                </p>
+                <p class="mt-2 text-[22px] font-extrabold leading-none tracking-tight text-brand-700">
+                    Rp {{ number_format($penjualanSummary['pendapatan_bulan_ini'], 0, ',', '.') }}
+                </p>
+                <p class="mt-1.5 text-[11px] font-semibold text-ink/40">{{ $penjualanSummary['transaksi_bulan_ini'] }} transaksi tercatat</p>
+            </div>
+
+            <div class="rounded-2xl border p-4 {{ $penjualanSummary['laba_bulan_ini'] < 0 ? 'border-rose-100 bg-rose-50/60' : 'border-emerald-100 bg-emerald-50/60' }}">
+                <p class="flex items-center gap-2 text-[11.5px] font-extrabold tracking-wide uppercase {{ $penjualanSummary['laba_bulan_ini'] < 0 ? 'text-rose-800/70' : 'text-emerald-800/70' }}">
+                    <i class="bi bi-piggy-bank"></i> Laba Bulan Ini
+                </p>
+                <p class="mt-2 text-[22px] font-extrabold leading-none tracking-tight {{ $penjualanSummary['laba_bulan_ini'] < 0 ? 'text-rose-700' : 'text-emerald-700' }}">
+                    {{ $penjualanSummary['laba_bulan_ini'] < 0 ? '−' : '' }}Rp {{ number_format(abs($penjualanSummary['laba_bulan_ini']), 0, ',', '.') }}
+                </p>
+                <p class="mt-1.5 text-[11px] font-semibold text-ink/40">Pendapatan dikurangi biaya bulan ini</p>
+            </div>
+
+            <div class="rounded-2xl border border-ink/[.06] bg-canvas/70 p-4">
+                <p class="flex items-center gap-2 text-[11.5px] font-extrabold tracking-wide text-ink/45 uppercase">
+                    <i class="bi bi-cash-stack"></i> Total Pendapatan
+                </p>
+                <p class="mt-2 text-[22px] font-extrabold leading-none tracking-tight text-ink">
+                    Rp {{ number_format($penjualanSummary['pendapatan_total'], 0, ',', '.') }}
+                </p>
+                <p class="mt-1.5 text-[11px] font-semibold text-ink/40">{{ $penjualanSummary['transaksi_total'] }} transaksi keseluruhan</p>
+            </div>
+        </div>
+
+        @if ($recentPenjualan->isNotEmpty())
+            <ul class="divide-y divide-ink/[.06] border-t border-ink/[.06]">
+                @foreach ($recentPenjualan as $row)
+                    <li class="flex items-center gap-3 px-4 py-3 transition hover:bg-brand-50/40 sm:px-5">
+                        <span class="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
+                            <span class="text-[13px] font-extrabold leading-none">{{ $row->tanggal->format('d') }}</span>
+                            <span class="mt-0.5 text-[8.5px] font-extrabold uppercase">{{ $row->tanggal->translatedFormat('M') }}</span>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-[12.5px] font-extrabold text-ink">{{ $row->nama_tanaman }}</p>
+                            <p class="truncate text-[11px] font-semibold text-ink/45">
+                                {{ $row->jumlahLabel() }}{{ $row->pembeli ? ' · '.$row->pembeli : '' }}
+                            </p>
+                        </div>
+                        <span class="shrink-0 text-[13px] font-extrabold whitespace-nowrap text-brand-700">
+                            Rp {{ number_format((float) $row->total, 0, ',', '.') }}
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
         @endif
     </section>
 
